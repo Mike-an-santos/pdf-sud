@@ -1,6 +1,6 @@
 {
   "name": "pdf-sud",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "PDF-SUD — leitor de PDF da SUD Lisboa",
   "main": "main.js",
   "author": "SUD Lisboa",
@@ -16,7 +16,10 @@
   "build": {
     "appId": "pt.sudlisboa.pdfsud",
     "productName": "PDF-SUD",
-    "files": [ "main.js", "PDF_SUD.html", "PDF.ico" ],
+    "files": [ "main.js", "preload.js", "PDF_SUD.html", "PDF.ico" ],
+    "fileAssociations": [
+      { "ext": "pdf", "name": "PDF", "description": "Documento PDF", "icon": "PDF.ico", "role": "Viewer" }
+    ],
     "win": {
       "target": "nsis",
       "icon": "PDF.ico"

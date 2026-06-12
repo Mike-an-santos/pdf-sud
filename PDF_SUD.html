@@ -181,7 +181,7 @@ var __PDFW="LyoqCiAqIEBsaWNzdGFydCBUaGUgZm9sbG93aW5nIGlzIHRoZSBlbnRpcmUgbGljZW5z
 <div id="printArea"></div>
 
 <script>
-/* leitor e worker embebidos no cabeçalho — app autónoma, sem internet */
+/* leitor e worker embebidos no cabeçalho — app autónoma */
 const stage=document.getElementById('stage'), caps=document.getElementById('caps'),
       countEl=document.getElementById('count'), docname=document.getElementById('docname');
 const btnImprimir=document.getElementById('btnImprimir'), btnGuardar=document.getElementById('btnGuardar');
@@ -215,18 +215,28 @@ btnImprimir.addEventListener('click',()=>{
 });
 
 async function abrir(file){
-  ficheiroAtual=file;
+  await carregar(await file.arrayBuffer(), file.name, file);
+}
+
+async function carregar(dados, nome, fileObj){
+  ficheiroAtual = fileObj || new File([dados], nome||'documento.pdf', {type:'application/pdf'});
   btnImprimir.disabled=false; btnGuardar.disabled=false;
-  docname.innerHTML='<span class="dot">●</span> '+file.name;
-  stage.innerHTML='<div class="empty-stage"><h2>A abrir…</h2><p>'+file.name+'</p></div>';
+  docname.innerHTML='<span class="dot">●</span> '+(nome||'documento.pdf');
+  stage.innerHTML='<div class="empty-stage"><h2>A abrir…</h2><p>'+(nome||'')+'</p></div>';
   pages=[]; captured=[]; pintarCaps();
   try{
-    const buf=await file.arrayBuffer();
-    pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;
+    pdfDoc=await pdfjsLib.getDocument({data:dados}).promise;
     await renderizar();
   }catch(err){
     stage.innerHTML='<div class="empty-stage"><h2 style="color:#e08a72">Não consegui abrir o PDF</h2><p>'+err.message+'</p></div>';
   }
+}
+
+// Abertura via "Abrir com" no Windows (programa Electron): recebe o PDF clicado
+if(window.electronAPI && window.electronAPI.onOpenPDF){
+  window.electronAPI.onOpenPDF(function(p){
+    try{ carregar(new Uint8Array(p.data), p.name); }catch(e){ console.error('abrir-com',e); }
+  });
 }
 
 async function renderizar(){
